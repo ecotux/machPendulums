@@ -1,0 +1,9 @@
+
+WISHLIST:
+- control bar for speed (time-based animation)
+- use online libraries, e.g.
+	<script src="https://rawgithub.com/mrdoob/three.js/master/build/three.js"></script>
+
+BUGS:
+- if I want to use "OrbitControl", the camera must look at (0,0,0) at the beginning
+
