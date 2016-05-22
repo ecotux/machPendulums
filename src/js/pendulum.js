@@ -1,4 +1,13 @@
 
+//var absX = -300;
+//var absY = -50;
+//var absZ = -350;
+
+var absX = 0;
+var absY = 0;
+var absZ = -60;
+
+
 function Light(scene,x,y,z) {
 	this.scene = scene;
 
@@ -17,14 +26,11 @@ function Camera(scene,x,y,z) {
 	var NEAR = 10;
 	var FAR = 10000;
 	this.camera = new THREE.PerspectiveCamera(VIEW_ANGLE,ASPECT,NEAR,FAR);
+
 	this.camera.position.x = x;
 	this.camera.position.y = y;
 	this.camera.position.z = z;
 
-	// if I want to use "OrbitControl", the camera must
-	// look at (0,0,0) at the beginning
-	this.target = new THREE.Vector3(0,0,0);
-	this.camera.lookAt(this.target);
 	this.scene.add(this.camera);
 }
 
@@ -32,7 +38,7 @@ Camera.prototype.getInstance = function() {
 	return this.camera;
 }
 
-function Top(scene) {
+function TopPiece(scene) {
 	this.scene = scene;
 
 	var geometryBar = new THREE.CylinderGeometry(5,5,15*15);
@@ -40,10 +46,13 @@ function Top(scene) {
 					color : 0xFFFFFF,
 				});
 	this.meshBar = new THREE.Mesh(geometryBar,materialBar);
+
+// absolute coordinates (origin: (absX,absY,absZ))
+	this.meshBar.position.x = absX;
+	this.meshBar.position.y = absY;
+	this.meshBar.position.z = 120 + absZ;
+
 	this.meshBar.rotation.x = Math.PI/2;
-	this.meshBar.position.x = -300;
-	this.meshBar.position.y = -50;
-	this.meshBar.position.z = 120-350;
 
 	this.scene.add(this.meshBar);
 }
@@ -68,17 +77,20 @@ function Pendulum(scene,z,p,theta0,color) {
 				});
 
 	this.meshSphere = new THREE.Mesh(geometrySphere,materialSphere);
+
+// relative coordinates (origin: (0,0,0))
 	this.meshSphere.position.x = this.l * Math.sin(this.theta0);
 	this.meshSphere.position.y = - this.l * Math.cos(this.theta0);
 	this.meshSphere.position.z = this.z;
 
-	this.meshSphere.position.x -= 300;
-	this.meshSphere.position.y -= 50;
-	this.meshSphere.position.z -= 350;
+// absolute coordinates (origin: (absX,absY,absZ))
+	this.meshSphere.position.x += absX;
+	this.meshSphere.position.y += absY;
+	this.meshSphere.position.z += absZ;
 
 	this.scene.add(this.meshSphere);
 
-	this.startLine = new THREE.Vector3(-300,-50,this.z-350);
+	this.startLine = new THREE.Vector3(absX,absY,this.z+absZ);
 	this.endLine = new THREE.Vector3(this.meshSphere.position.x,this.meshSphere.position.y,this.meshSphere.position.z);
 	var materialWire = new THREE.LineBasicMaterial({
 					color : this.color,
@@ -94,13 +106,16 @@ function Pendulum(scene,z,p,theta0,color) {
 
 Pendulum.prototype.tick = function(time) {
 	var theta = this.theta0*Math.cos(2*Math.PI*time/this.p);
+
+// relative coordinates (origin: (0,0,0))
 	this.meshSphere.position.x = this.l * Math.sin(theta);
 	this.meshSphere.position.y = - this.l * Math.cos(theta);
 	this.meshSphere.position.z = this.z;
 
-	this.meshSphere.position.x -= 300;
-	this.meshSphere.position.y -= 50;
-	this.meshSphere.position.z -= 350;
+// absolute coordinates (origin: (absX,absY,absZ))
+	this.meshSphere.position.x += absX;
+	this.meshSphere.position.y += absY;
+	this.meshSphere.position.z += absZ;
 
 	this.wire.geometry.vertices[1] = new THREE.Vector3(this.meshSphere.position.x,this.meshSphere.position.y,this.meshSphere.position.z);
 	this.wire.geometry.verticesNeedUpdate = true;
@@ -110,15 +125,16 @@ Pendulum.prototype.tick = function(time) {
 function machPendulums() {
 	this.renderer = new THREE.WebGLRenderer();
 	this.renderer.setSize(640,480);
+
 	var container = document.getElementById('container');
 	container.appendChild(this.renderer.domElement);
 
 	this.scene = new THREE.Scene();
 
 	this.light = new Light(this.scene,1000,-100,100);
-//	this.camera = new Camera(this.scene,60,30,50);
-	this.camera = new Camera(this.scene,240,120,200);
-	this.top = new Top(this.scene);
+	this.camera = new Camera(this.scene,600,-300,600);
+
+	this.top = new TopPiece(this.scene);
 
 	this.controls = new THREE.OrbitControls( this.camera.getInstance(), this.renderer.domElement );
 
@@ -129,9 +145,10 @@ function machPendulums() {
 
 	this.pendulums = [];
 	for(var i = 0; i < 15; i++) { 
-		z = z + 15;
 		color.setHSL((15-i)/20,0.6,0.8);
 		p = 60/(51+(15-i));
+		// "z" is a relative coordinate
+		z = z + 15;
 		this.pendulums.push(new Pendulum(this.scene,z,p,theta,color));
 	}
 

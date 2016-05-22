@@ -7,3 +7,13 @@ WISHLIST:
 BUGS:
 - if I want to use "OrbitControl", the camera must look at (0,0,0) at the beginning
 
+- see:
+ThreeJS camera.lookAt() has no effect, is there something I'm doing wrong?
+http://stackoverflow.com/questions/10325095/threejs-camera-lookat-has-no-effect-is-there-something-im-doing-wrong
+
+Three.js changing camera lookat with click of button
+http://stackoverflow.com/questions/20864383/three-js-changing-camera-lookat-with-click-of-button
+
+Three.js, the lookAt function issue
+http://stackoverflow.com/questions/17675958/three-js-the-lookat-function-issue
+
